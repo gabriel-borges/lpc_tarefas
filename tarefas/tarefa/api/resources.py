@@ -14,7 +14,19 @@ class TarefaResource(ModelResource):
         usuario = bundle.data['usuario'].split("/")
         projeto = bundle.data['projeto'].split("/")
 
-        listaExiste = Tarefa.objects.filter(nome=nome, projeto=projeto[4])
+        if not Tarefa.objects.filter(projeto=projeto[4]):
+            cadastrar = Tarefa()
+            cadastrar.nome = bundle.data['nome']
+            cadastrar.dataEHoraDeInicio = bundle.data['dataEHoraDeInicio']
+            cadastrar.usuario = Usuario.objects.get(pk=usuario[4])
+            cadastrar.projeto = Projeto.objects.get(pk=projeto[4])
+            cadastrar.save()
+            bundle.obj = cadastrar
+            return bundle
+        else:
+            raise Unauthorized('Já existe tarefa com essa pessoa');
+
+        '''listaExiste = Tarefa.objects.filter(nome=nome, projeto=projeto[4])
 
         if listaExiste.count() > 0:
             raise Unauthorized('Essa Tarefa já está atribuída a um Projeto');
@@ -26,7 +38,7 @@ class TarefaResource(ModelResource):
             cadastrar.projeto = Projeto.objects.get(pk=projeto[4])
             cadastrar.save()
             bundle.obj = cadastrar
-            return bundle
+            return bundle'''
 
     def obj_delete_list(self, bundle, **kwargs):
         raise Unauthorized('Ops! Você não pode deletar a lista inteira')
